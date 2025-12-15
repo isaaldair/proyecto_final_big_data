@@ -1,0 +1,5 @@
+pyspark==3.5.1
+kafka-python==2.0.2
+cassandra-driver==3.29.1
+python-dotenv==1.0.1
+pandas==2.2.2

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kafka Realtime Monitor</title>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #38bdf8;
+      margin-bottom: 5px;
+    }
+
+    .status {
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #22c55e;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      min-height: 350px;   /* 🔥 CLAVE */
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #38bdf8;
+      margin-bottom: 10px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 260px;       /* 🔥 CLAVE */
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #334155;
+      padding: 6px;
+      text-align: left;
+    }
+
+    th {
+      color: #94a3b8;
+      font-weight: normal;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Kafka — Monitor en Tiempo Real</h1>
+<div class="status">🟢 Conectado al servidor WebSocket</div>
+
+<div class="dashboard">
+
+  <!-- Throughput -->
+  <div class="card">
+    <h2>📈 Throughput (msgs / segundo)</h2>
+    <div class="chart-container">
+      <canvas id="throughputChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Latencia -->
+  <div class="card">
+    <h2>⏱️ Latencia Kafka → Web (ms)</h2>
+    <div class="chart-container">
+      <canvas id="latencyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card" style="grid-column: span 2;">
+    <h2>🧾 Últimos eventos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Topic</th>
+          <th>Trip</th>
+          <th>Latencia (ms)</th>
+        </tr>
+      </thead>
+      <tbody id="eventsTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const socket = io();
+
+  // =========================
+  // CHARTS
+  // =========================
+
+  const throughputCtx = document.getElementById("throughputChart").getContext("2d");
+  const latencyCtx = document.getElementById("latencyChart").getContext("2d");
+
+  const throughputChart = new Chart(throughputCtx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "msgs/s",
+        data: [],
+        borderColor: "#22c55e",
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false
+    }
+  });
+
+  const latencyChart = new Chart(latencyCtx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "ms",
+        data: [],
+        borderColor: "#fbbf24",
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false
+    }
+  });
+
+  // =========================
+  // METRICS
+  // =========================
+
+  let msgCount = 0;
+  let lastTick = Date.now();
+
+  setInterval(() => {
+    const now = Date.now();
+    const rate = msgCount;
+    msgCount = 0;
+
+    throughputChart.data.labels.push(new Date().toLocaleTimeString());
+    throughputChart.data.datasets[0].data.push(rate);
+
+    if (throughputChart.data.labels.length > 20) {
+      throughputChart.data.labels.shift();
+      throughputChart.data.datasets[0].data.shift();
+    }
+
+    throughputChart.update();
+    lastTick = now;
+  }, 1000);
+
+  // =========================
+  // SOCKET EVENTS
+  // =========================
+
+  socket.on("kafka_event", payload => {
+    msgCount++;
+
+    const now = Date.now();
+    const sentAt = payload.data?.sent_at
+      ? new Date(payload.data.sent_at).getTime()
+      : now;
+
+    const latency = now - sentAt;
+
+    latencyChart.data.labels.push(new Date().toLocaleTimeString());
+    latencyChart.data.datasets[0].data.push(latency);
+
+    if (latencyChart.data.labels.length > 20) {
+      latencyChart.data.labels.shift();
+      latencyChart.data.datasets[0].data.shift();
+    }
+
+    latencyChart.update();
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${new Date().toLocaleTimeString()}</td>
+      <td>${payload.topic}</td>
+      <td>${payload.data?.index_trip ?? "N/A"}</td>
+      <td>${latency}</td>
+    `;
+    document.getElementById("eventsTable").prepend(row);
+
+    if (document.getElementById("eventsTable").children.length > 15) {
+      document.getElementById("eventsTable").lastChild.remove();
+    }
+  });
+</script>
+
+</body>
+</html>

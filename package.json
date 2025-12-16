@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/isaaldair/proyecto_final_big_data#readme",
   "dependencies": {
+    "csv-parser": "^3.2.0",
     "express": "^5.2.1",
     "kafkajs": "^2.2.4",
     "socket.io": "^4.8.1"

@@ -1,0 +1,11 @@
+pickup_zone,source,total_sales_zone,year,hour
+Crotona Park East,uber_trips_clean,4.489999771118164,,
+Crotona Park East,uber_trips_prod,4.489999771118164,,
+Manhattanville,uber_trips_clean,2.9700002670288086,,
+Manhattanville,uber_trips_prod,2.9700002670288086,,
+East New York,uber_trips_prod,1.8499999046325684,,
+East New York,uber_trips_clean,1.8499999046325684,,
+East Flatbush/Remsen Village,uber_trips_clean,1.570000171661377,,
+East Flatbush/Remsen Village,uber_trips_prod,1.570000171661377,,
+Madison,uber_trips_clean,1.4900016784667969,,
+Madison,uber_trips_prod,1.4900016784667969,,

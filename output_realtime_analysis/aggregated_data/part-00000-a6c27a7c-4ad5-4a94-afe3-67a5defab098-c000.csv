@@ -1,0 +1,7 @@
+pickup_zone,source,total_sales_zone,year,hour
+Bensonhurst West,uber_trips_prod,8.500001907348633,,
+Bensonhurst West,uber_trips_clean,8.500001907348633,,
+Van Cortlandt Village,uber_trips_prod,5.809999465942383,,
+Van Cortlandt Village,uber_trips_clean,5.809999465942383,,
+Windsor Terrace,uber_trips_prod,2.8500003814697266,,
+Windsor Terrace,uber_trips_clean,2.8500003814697266,,

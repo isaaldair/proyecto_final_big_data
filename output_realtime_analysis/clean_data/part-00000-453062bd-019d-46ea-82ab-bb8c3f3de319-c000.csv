@@ -1,0 +1,1 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at

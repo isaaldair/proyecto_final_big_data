@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+53,2021-01-06T09:39:40+00:00,2021-01-06T09:44:19+00:00,2021-01-06T09:54:05+00:00,254,185,11.83,0.0,9.25,,,,,,2.58,Williamsbridge/Olinville,Pelham Parkway,uber_trips_clean,2025-12-16T00:16:28.996887+00:00

@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+987,2021-01-03T06:34:26+00:00,2021-01-03T06:39:19+00:00,2021-01-03T06:50:13+00:00,218,265,18.06,0.0,13.03,,,,,,5.0299997,Springfield Gardens North,,uber_trips_prod,2025-12-16T00:16:34.021159+00:00

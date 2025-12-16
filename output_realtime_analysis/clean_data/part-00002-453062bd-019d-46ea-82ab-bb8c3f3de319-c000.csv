@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+919,2021-01-02T21:36:52+00:00,2021-01-02T21:40:42+00:00,2021-01-02T21:49:23+00:00,76,37,7.91,0.0,6.06,,,,,,1.8499999,East New York,Bushwick South,uber_trips_clean,2025-12-16T00:17:44.068250+00:00

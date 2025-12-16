@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+247,2021-01-17T22:42:47+00:00,2021-01-17T22:46:16+00:00,2021-01-17T22:52:33+00:00,76,76,7.42,0.0,5.63,,,,,,1.79,East New York,East New York,uber_trips_clean,2025-12-16T00:17:34.061399+00:00

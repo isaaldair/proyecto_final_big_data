@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Kafka Realtime Monitor</title>
+
+    <!-- Socket.IO (SERVIDO POR EXPRESS) -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #38bdf8;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .ok {
+            color: #22c55e;
+        }
+
+        .bad {
+            color: #ef4444;
+        }
+
+        #events {
+            margin-top: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .event {
+            background: #020617;
+            border-left: 4px solid #22c55e;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .topic {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        pre {
+            background: #020617;
+            padding: 10px;
+            overflow-x: auto;
+            color: #a7f3d0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📊 Kafka — Monitor en Tiempo Real</h1>
+<div class="status" id="status">⏳ Conectando al WebSocket…</div>
+
+<div id="events"></div>
+
+<script>
+    console.log("🔥 HTML cargado");
+
+    const statusDiv = document.getElementById("status");
+    const eventsDiv = document.getElementById("events");
+
+    // ⚡ Conexión Socket.IO
+    const socket = io();
+
+    socket.on("connect", () => {
+        console.log("🟢 Conectado al WebSocket");
+        statusDiv.innerHTML = "🟢 Conectado al servidor WebSocket";
+        statusDiv.className = "status ok";
+    });
+
+    socket.on("disconnect", () => {
+        console.log("🔴 WebSocket desconectado");
+        statusDiv.innerHTML = "🔴 WebSocket desconectado";
+        statusDiv.className = "status bad";
+    });
+
+    socket.on("connect_error", (err) => {
+        console.error("❌ Error de conexión WebSocket", err);
+        statusDiv.innerHTML = "❌ Error conectando al WebSocket";
+        statusDiv.className = "status bad";
+    });
+
+    // 📩 EVENTOS DESDE KAFKA
+    socket.on("kafka_event", (payload) => {
+        console.log("📩 Evento Kafka recibido:", payload);
+
+        const div = document.createElement("div");
+        div.className = "event";
+
+        div.innerHTML = `
+            <div class="topic">📌 Topic: ${payload.topic}</div>
+            <div class="timestamp">⏱ ${payload.timestamp}</div>
+            <pre>${JSON.stringify(payload.data, null, 2)}</pre>
+        `;
+
+        eventsDiv.prepend(div);
+
+        // Limitar a 100 eventos
+        if (eventsDiv.children.length > 100) {
+            eventsDiv.removeChild(eventsDiv.lastChild);
+        }
+    });
+</script>
+
+</body>
+</html>

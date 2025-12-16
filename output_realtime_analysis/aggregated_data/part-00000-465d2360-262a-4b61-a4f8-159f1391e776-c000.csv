@@ -1,0 +1,11 @@
+pickup_zone,source,total_sales_zone,year,hour
+Elmhurst,uber_trips_prod,5.909998893737793,,
+Elmhurst,uber_trips_clean,5.909998893737793,,
+Fresh Meadows,uber_trips_prod,2.729999542236328,,
+Fresh Meadows,uber_trips_clean,2.729999542236328,,
+Astoria,uber_trips_prod,2.5099997520446777,,
+Astoria,uber_trips_clean,2.5099997520446777,,
+Two Bridges/Seward Park,uber_trips_clean,2.1399993896484375,,
+Two Bridges/Seward Park,uber_trips_prod,2.1399993896484375,,
+Queens Village,uber_trips_prod,1.8100004196166992,,
+Queens Village,uber_trips_clean,1.8100004196166992,,

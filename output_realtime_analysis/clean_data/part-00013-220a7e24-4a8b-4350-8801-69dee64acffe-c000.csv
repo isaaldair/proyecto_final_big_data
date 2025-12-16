@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+91,2021-01-11T19:11:07+00:00,2021-01-11T19:14:00+00:00,2021-01-11T19:23:21+00:00,37,225,7.38,0.0,6.4,,,,,,0.98,Bushwick South,Stuyvesant Heights,uber_trips_prod,2025-12-16T00:16:49.031116+00:00

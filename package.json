@@ -1,0 +1,26 @@
+{
+  "name": "proyectofinal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaaldair/proyecto_final_big_data.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/isaaldair/proyecto_final_big_data/issues"
+  },
+  "homepage": "https://github.com/isaaldair/proyecto_final_big_data#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "kafkajs": "^2.2.4",
+    "socket.io": "^4.8.1"
+  }
+}

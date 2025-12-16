@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+778,2021-01-17T10:34:28+00:00,2021-01-17T10:39:29+00:00,2021-01-17T10:50:05+00:00,14,228,7.22,0.0,7.61,,,,,,-0.39000034,Bay Ridge,Sunset Park West,uber_trips_prod,2025-12-16T00:17:14.043893+00:00

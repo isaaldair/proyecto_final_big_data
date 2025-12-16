@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+819,2021-01-31T16:12:36+00:00,2021-01-31T16:24:12+00:00,2021-01-31T16:55:39+00:00,35,210,24.69,0.0,26.38,,,,,,-1.6899986,Brownsville,Sheepshead Bay,uber_trips_clean,2025-12-16T00:17:19.049876+00:00

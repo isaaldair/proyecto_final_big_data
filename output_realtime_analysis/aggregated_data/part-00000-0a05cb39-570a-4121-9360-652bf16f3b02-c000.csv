@@ -1,0 +1,11 @@
+pickup_zone,source,total_sales_zone,year,hour
+Kingsbridge Heights,uber_trips_prod,3.010000228881836,,
+Kingsbridge Heights,uber_trips_clean,3.010000228881836,,
+Bath Beach,uber_trips_prod,-0.1400003433227539,,
+Bath Beach,uber_trips_clean,-0.1400003433227539,,
+Murray Hill,uber_trips_prod,-0.5799999237060547,,
+Murray Hill,uber_trips_clean,-0.5799999237060547,,
+Chinatown,uber_trips_clean,-2.559999465942383,,
+Chinatown,uber_trips_prod,-2.559999465942383,,
+Jamaica,uber_trips_clean,-7.789999008178711,,
+Jamaica,uber_trips_prod,-7.789999008178711,,

@@ -1,0 +1,9 @@
+pickup_zone,source,total_sales_zone,year,hour
+Marble Hill,uber_trips_clean,3.6999998092651367,,
+Marble Hill,uber_trips_prod,3.6999998092651367,,
+Jamaica,uber_trips_clean,2.809999465942383,,
+Jamaica,uber_trips_prod,2.809999465942383,,
+Lincoln Square West,uber_trips_clean,2.339999198913574,,
+Lincoln Square West,uber_trips_prod,2.339999198913574,,
+Mount Hope,uber_trips_prod,0.6899995803833008,,
+Mount Hope,uber_trips_clean,0.6899995803833008,,

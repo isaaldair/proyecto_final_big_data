@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+128,2021-01-12T23:36:22+00:00,2021-01-12T23:39:51+00:00,2021-01-12T23:54:14+00:00,137,97,20.16,0.0,14.19,,,,,,5.9700003,Kips Bay,Fort Greene,uber_trips_prod,2025-12-16T00:16:54.032557+00:00

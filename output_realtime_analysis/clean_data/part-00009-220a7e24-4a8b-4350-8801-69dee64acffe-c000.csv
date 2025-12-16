@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+110,2021-01-30T14:34:31+00:00,2021-01-30T14:36:39+00:00,2021-01-30T14:48:24+00:00,212,252,7.86,0.0,11.37,,,,,,-3.5099998,Soundview/Bruckner,Whitestone,uber_trips_clean,2025-12-16T00:16:44.027241+00:00

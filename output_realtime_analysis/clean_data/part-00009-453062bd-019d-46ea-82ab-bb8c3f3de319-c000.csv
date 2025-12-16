@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+117,2021-01-20T06:59:25+00:00,2021-01-20T07:02:48+00:00,2021-01-20T07:28:40+00:00,149,231,25.54,0.0,24.05,,,,,,1.4900017,Madison,TriBeCa/Civic Center,uber_trips_clean,2025-12-16T00:17:59.073369+00:00

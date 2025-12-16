@@ -1,0 +1,2 @@
+index_trip,request_datetime,pickup_datetime,dropoff_datetime,pulocationid,dolocationid,base_passenger_fare,tips,driver_pay,hour,year,month,day,on_time_pickup,uber_sales,pickup_zone,delivery_zone,source,sent_at
+251,2021-01-17T02:00:00+00:00,2021-01-17T01:45:00+00:00,2021-01-17T02:10:06+00:00,41,186,18.94,0.0,18.96,,,,,,-0.01999855,Central Harlem,Penn Station/Madison Sq West,uber_trips_prod,2025-12-16T00:17:04.037414+00:00

@@ -1,0 +1,9 @@
+pickup_zone,source,total_sales_zone,year,hour
+Financial District North,uber_trips_clean,7.65000057220459,,
+Financial District North,uber_trips_prod,7.65000057220459,,
+Kips Bay,uber_trips_clean,5.970000267028809,,
+Kips Bay,uber_trips_prod,5.970000267028809,,
+Springfield Gardens North,uber_trips_clean,5.029999732971191,,
+Springfield Gardens North,uber_trips_prod,5.029999732971191,,
+Bushwick South,uber_trips_clean,0.9800000190734863,,
+Bushwick South,uber_trips_prod,0.9800000190734863,,

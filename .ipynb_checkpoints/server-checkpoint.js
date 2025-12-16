@@ -1,96 +1,112 @@
+/**
+ * Consumer: Node.js Realtime Monitor
+ * Rol:
+ *  - Consumir eventos Kafka en tiempo real
+ *  - NO persistir datos
+ *  - Emitir eventos enriquecidos al dashboard web
+ *  - Permitir análisis de:
+ *      - Volumen por producer
+ *      - Latencia
+ *      - Calidad de datos
+ */
+
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const csv = require("csv-parser");
+const http = require("http");
+const { Server } = require("socket.io");
+const { Kafka } = require("kafkajs");
+
+// =====================================================
+// CONFIGURACIÓN GENERAL
+// =====================================================
+
+const KAFKA_BROKER = "100.68.89.127:9092";
+const TOPICS = ["uber_trips_clean", "uber_trips_prod"];
+const GROUP_ID = "nodejs-realtime-monitor";
+
+const PORT = 3000;
+const CONSUMER_NAME = "Node.js Realtime Consumer";
+
+// =====================================================
+// EXPRESS + SOCKET.IO
+// =====================================================
 
 const app = express();
-const PORT = 3000;
-
-const AGG_DIR = "output_realtime_analysis/aggregated_data";
-const CLEAN_DIR = "output_realtime_analysis/clean_data";
+const server = http.createServer(app);
+const io = new Server(server);
 
 app.use(express.static("public"));
 
-function readCSVFolder(folder) {
-    return new Promise(resolve => {
-        if (!fs.existsSync(folder)) return resolve([]);
-        const files = fs.readdirSync(folder).filter(f => f.endsWith(".csv"));
-        if (files.length === 0) return resolve([]);
-
-        const rows = [];
-        let pending = files.length;
-
-        files.forEach(file => {
-            fs.createReadStream(path.join(folder, file))
-                .pipe(csv())
-                .on("data", r => rows.push(r))
-                .on("end", () => {
-                    pending--;
-                    if (pending === 0) resolve(rows);
-                });
-        });
-    });
-}
-
-app.get("/api/dashboard", async (req, res) => {
-    const agg = await readCSVFolder(AGG_DIR);
-    const clean = await readCSVFolder(CLEAN_DIR);
-
-    // TOTAL SALES
-    const totalSales = agg.reduce(
-        (s, r) => s + Number(r.total_sales_zone || 0), 0
-    );
-
-    // TOP ZONES
-    const byZone = {};
-    agg.forEach(r => {
-        byZone[r.pickup_zone] =
-            (byZone[r.pickup_zone] || 0) + Number(r.total_sales_zone || 0);
-    });
-
-    const topZones = Object.entries(byZone)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([zone, sales]) => ({ zone, sales }));
-
-    // SALES BY HOUR
-    const byHour = {};
-    agg.forEach(r => {
-        byHour[r.hour] =
-            (byHour[r.hour] || 0) + Number(r.total_sales_zone || 0);
-    });
-
-    // LATENCY STATS
-    const latencies = clean
-        .filter(r => r.sent_at)
-        .map(r => {
-            const sent = new Date(r.sent_at).getTime();
-            const recv = new Date(r.pickup_datetime).getTime();
-            return recv - sent;
-        })
-        .filter(v => v >= 0);
-
-    latencies.sort((a, b) => a - b);
-
-    const p = q => latencies.length
-        ? latencies[Math.floor(q * latencies.length)]
-        : 0;
-
-    res.json({
-        totalSales,
-        topZones,
-        salesByHour: byHour,
-        latency: {
-            avg: latencies.length
-                ? Math.round(latencies.reduce((a,b)=>a+b,0)/latencies.length)
-                : 0,
-            p50: p(0.50),
-            p95: p(0.95),
-            p99: p(0.99)
-        }
+io.on("connection", (socket) => {
+    console.log("Cliente web conectado al dashboard");
+    socket.emit("consumer_info", {
+        consumer: CONSUMER_NAME,
+        topics: TOPICS,
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Dashboard disponible en http://localhost:${PORT}`);
+// =====================================================
+// KAFKA CONSUMER
+// =====================================================
+
+const kafka = new Kafka({
+    clientId: "uber-realtime-dashboard",
+    brokers: [KAFKA_BROKER],
+});
+
+const consumer = kafka.consumer({ groupId: GROUP_ID });
+
+async function startKafkaConsumer() {
+    await consumer.connect();
+
+    for (const topic of TOPICS) {
+        await consumer.subscribe({
+            topic,
+            fromBeginning: false,
+        });
+    }
+
+    console.log("Kafka consumer conectado");
+    console.log("Topics suscritos:", TOPICS);
+
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+            try {
+                const rawValue = message.value.toString();
+                const data = JSON.parse(rawValue);
+
+                /**
+                 * Enriquecimiento del evento
+                 * - _producer : topic Kafka (simula producer)
+                 * - _consumer : consumer actual
+                 * - _received_at : timestamp recepción
+                 */
+                const event = {
+                    ...data,
+                    _producer: topic,
+                    _consumer: CONSUMER_NAME,
+                    _received_at: new Date().toISOString(),
+                };
+
+                io.emit("kafka_event", event);
+
+                console.log(
+                    `[${topic}] Trip ${data.index_trip ?? "N/A"} recibido`
+                );
+
+            } catch (err) {
+                console.error("Error procesando mensaje Kafka:", err);
+            }
+        },
+    });
+}
+
+// =====================================================
+// START SERVER
+// =====================================================
+
+server.listen(PORT, () => {
+    console.log(`Dashboard activo en http://localhost:${PORT}`);
+    startKafkaConsumer().catch((err) => {
+        console.error("Error iniciando Kafka consumer:", err);
+    });
 });

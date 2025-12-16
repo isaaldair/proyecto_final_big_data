@@ -1,0 +1,9 @@
+pickup_zone,source,total_sales_zone,year,hour
+Gowanus,uber_trips_clean,9.489997863769531,,
+Gowanus,uber_trips_prod,9.489997863769531,,
+LaGuardia Airport,uber_trips_clean,3.519998550415039,,
+LaGuardia Airport,uber_trips_prod,3.519998550415039,,
+East New York,uber_trips_clean,3.25,,
+East New York,uber_trips_prod,3.25,,
+Corona,uber_trips_clean,2.0500001907348633,,
+Corona,uber_trips_prod,2.0500001907348633,,

@@ -1,0 +1,5 @@
+pickup_zone,source,total_sales_zone,year,hour
+Crown Heights North,uber_trips_prod,1.4200000762939453,,
+Crown Heights North,uber_trips_clean,1.4200000762939453,,
+Williamsburg (North Side),uber_trips_clean,1.3400006294250488,,
+Williamsburg (North Side),uber_trips_prod,1.3400006294250488,,

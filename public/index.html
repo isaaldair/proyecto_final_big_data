@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Uber – Realtime Analytics Dashboard</title>
+<meta charset="UTF-8" />
+<title>Kafka Realtime Monitoring Dashboard</title>
+
+<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -10,85 +12,284 @@ body {
     font-family: Arial, sans-serif;
     background: #0f172a;
     color: #e5e7eb;
+    margin: 0;
     padding: 20px;
 }
-h1 { color: #38bdf8; }
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+
+h1 {
+    color: #38bdf8;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #94a3b8;
     margin-bottom: 20px;
 }
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
 .kpi {
     background: #1e293b;
     padding: 15px;
     border-radius: 10px;
     text-align: center;
 }
-.kpi h3 { font-size: 13px; color: #94a3b8; }
-.kpi span { font-size: 22px; }
+
+.kpi h3 {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.kpi span {
+    font-size: 22px;
+    font-weight: bold;
+}
+
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
+
 .card {
     background: #1e293b;
     padding: 15px;
     border-radius: 12px;
 }
-canvas { height: 260px; }
+
+canvas {
+    height: 260px !important;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Uber – Dashboard Analítico</h1>
-
-<div class="kpis">
-    <div class="kpi"><h3>Total Ventas</h3><span id="totalSales">0</span></div>
-    <div class="kpi"><h3>Latencia Avg</h3><span id="latAvg">0</span></div>
-    <div class="kpi"><h3>Latencia p95</h3><span id="latP95">0</span></div>
-    <div class="kpi"><h3>Latencia p99</h3><span id="latP99">0</span></div>
+<h1>Kafka Realtime Monitoring Dashboard</h1>
+<div class="subtitle" id="consumerInfo">
+    Consumer activo: -
 </div>
 
+<!-- ================= KPIs ================= -->
+<div class="kpis">
+    <div class="kpi">
+        <h3>Eventos Totales</h3>
+        <span id="totalEvents">0</span>
+    </div>
+    <div class="kpi">
+        <h3>Producer Activo</h3>
+        <span id="lastProducer">-</span>
+    </div>
+    <div class="kpi">
+        <h3>Latencia Media (ms)</h3>
+        <span id="avgLatency">0</span>
+    </div>
+    <div class="kpi">
+        <h3>Eventos con Datos Faltantes</h3>
+        <span id="badEvents">0</span>
+    </div>
+    <div class="kpi">
+        <h3>Ventana Analizada</h3>
+        <span>Tiempo real</span>
+    </div>
+</div>
+
+<!-- ================= GRÁFICOS ================= -->
 <div class="grid">
     <div class="card">
-        <h3>Top Zonas por Ventas</h3>
-        <canvas id="zonesChart"></canvas>
+        <h3>Eventos procesados por Producer (Kafka Topic)</h3>
+        <canvas id="eventsByProducerChart"></canvas>
     </div>
+
     <div class="card">
-        <h3>Ventas por Hora</h3>
-        <canvas id="hourChart"></canvas>
+        <h3>Latencia promedio por Producer (ms)</h3>
+        <canvas id="latencyByProducerChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Eventos con campos faltantes por Producer</h3>
+        <canvas id="qualityChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Eventos recibidos (ventana móvil)</h3>
+        <canvas id="eventsTimelineChart"></canvas>
     </div>
 </div>
 
 <script>
-fetch("/api/dashboard")
-.then(r => r.json())
-.then(d => {
-    document.getElementById("totalSales").innerText =
-        d.totalSales.toFixed(2);
-    document.getElementById("latAvg").innerText = d.latency.avg;
-    document.getElementById("latP95").innerText = d.latency.p95;
-    document.getElementById("latP99").innerText = d.latency.p99;
+const socket = io();
 
-    new Chart(document.getElementById("zonesChart"), {
+// ================= CONFIG =================
+const MAX_POINTS = 50;
+
+// ================= ESTADO =================
+let totalEvents = 0;
+let badEvents = 0;
+
+let eventsTimeline = [];
+
+let eventsByProducer = {};
+let latencyByProducer = {};
+let badByProducer = {};
+
+// ================= CHARTS =================
+const eventsByProducerChart = new Chart(
+    document.getElementById("eventsByProducerChart"),
+    {
         type: "bar",
         data: {
-            labels: d.topZones.map(z => z.zone),
-            datasets: [{ data: d.topZones.map(z => z.sales) }]
-        }
-    });
+            labels: [],
+            datasets: [{
+                label: "Eventos",
+                data: [],
+                backgroundColor: "#38bdf8"
+            }]
+        },
+        options: { animation: false, maintainAspectRatio: false }
+    }
+);
 
-    new Chart(document.getElementById("hourChart"), {
+const latencyByProducerChart = new Chart(
+    document.getElementById("latencyByProducerChart"),
+    {
+        type: "bar",
+        data: {
+            labels: [],
+            datasets: [{
+                label: "Latencia promedio (ms)",
+                data: [],
+                backgroundColor: "#22c55e"
+            }]
+        },
+        options: { animation: false, maintainAspectRatio: false }
+    }
+);
+
+const qualityChart = new Chart(
+    document.getElementById("qualityChart"),
+    {
+        type: "bar",
+        data: {
+            labels: [],
+            datasets: [{
+                label: "Eventos con datos faltantes",
+                data: [],
+                backgroundColor: "#f97316"
+            }]
+        },
+        options: { animation: false, maintainAspectRatio: false }
+    }
+);
+
+const eventsTimelineChart = new Chart(
+    document.getElementById("eventsTimelineChart"),
+    {
         type: "line",
         data: {
-            labels: Object.keys(d.salesByHour),
-            datasets: [{ data: Object.values(d.salesByHour) }]
-        }
-    });
+            labels: [],
+            datasets: [{
+                label: "Eventos",
+                data: [],
+                borderColor: "#a78bfa",
+                fill: false
+            }]
+        },
+        options: { animation: false, maintainAspectRatio: false }
+    }
+);
+
+// ================= SOCKET EVENTS =================
+socket.on("consumer_info", info => {
+    document.getElementById("consumerInfo").innerText =
+        `Consumer activo: ${info.consumer} | Topics: ${info.topics.join(", ")}`;
 });
+
+socket.on("kafka_event", data => {
+    totalEvents++;
+
+    const producer = data._producer || "desconocido";
+    document.getElementById("lastProducer").innerText = producer;
+
+    // -------- Conteo por producer
+    eventsByProducer[producer] = (eventsByProducer[producer] || 0) + 1;
+
+    // -------- Latencia
+    if (data.sent_at) {
+        const latency =
+            Date.now() - new Date(data.sent_at).getTime();
+        latencyByProducer[producer] ??= [];
+        latencyByProducer[producer].push(latency);
+    }
+
+    // -------- Calidad de datos
+    const hasMissing =
+        !data.pickup_zone ||
+        data.uber_sales == null ||
+        !data.sent_at;
+
+    if (hasMissing) {
+        badEvents++;
+        badByProducer[producer] = (badByProducer[producer] || 0) + 1;
+    }
+
+    // -------- Timeline
+    eventsTimeline.push(totalEvents);
+    if (eventsTimeline.length > MAX_POINTS) {
+        eventsTimeline.shift();
+    }
+
+    updateKPIs();
+    updateCharts();
+});
+
+// ================= UPDATE UI =================
+function updateKPIs() {
+    document.getElementById("totalEvents").innerText = totalEvents;
+    document.getElementById("badEvents").innerText = badEvents;
+
+    const allLatencies = Object.values(latencyByProducer).flat();
+    const avgLatency = allLatencies.length
+        ? Math.round(allLatencies.reduce((a,b)=>a+b,0) / allLatencies.length)
+        : 0;
+
+    document.getElementById("avgLatency").innerText = avgLatency;
+}
+
+function updateCharts() {
+    // ---- Eventos por producer
+    eventsByProducerChart.data.labels = Object.keys(eventsByProducer);
+    eventsByProducerChart.data.datasets[0].data =
+        Object.values(eventsByProducer);
+    eventsByProducerChart.update();
+
+    // ---- Latencia por producer
+    latencyByProducerChart.data.labels = Object.keys(latencyByProducer);
+    latencyByProducerChart.data.datasets[0].data =
+        Object.values(latencyByProducer).map(arr =>
+            Math.round(arr.reduce((a,b)=>a+b,0) / arr.length)
+        );
+    latencyByProducerChart.update();
+
+    // ---- Calidad
+    qualityChart.data.labels = Object.keys(badByProducer);
+    qualityChart.data.datasets[0].data =
+        Object.values(badByProducer);
+    qualityChart.update();
+
+    // ---- Timeline
+    eventsTimelineChart.data.labels =
+        eventsTimeline.map((_, i) => i);
+    eventsTimelineChart.data.datasets[0].data =
+        eventsTimeline;
+    eventsTimelineChart.update();
+}
 </script>
 
 </body>

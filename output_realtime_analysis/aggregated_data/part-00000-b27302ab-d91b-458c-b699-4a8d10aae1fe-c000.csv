@@ -1,0 +1,9 @@
+pickup_zone,source,total_sales_zone,year,hour
+Manhattan Valley,uber_trips_prod,10.029998779296875,,
+Manhattan Valley,uber_trips_clean,10.029998779296875,,
+East New York,uber_trips_clean,1.7899999618530273,,
+East New York,uber_trips_prod,1.7899999618530273,,
+Flatlands,uber_trips_clean,1.7599992752075195,,
+Flatlands,uber_trips_prod,1.7599992752075195,,
+Highbridge,uber_trips_clean,1.3099994659423828,,
+Highbridge,uber_trips_prod,1.3099994659423828,,

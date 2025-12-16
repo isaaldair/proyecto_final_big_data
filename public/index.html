@@ -1,128 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Kafka Realtime Monitor</title>
+<meta charset="UTF-8">
+<title>Uber – Realtime Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Socket.IO (SERVIDO POR EXPRESS) -->
-    <script src="/socket.io/socket.io.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: #e5e7eb;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #38bdf8;
-            margin-bottom: 5px;
-        }
-
-        .status {
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .ok {
-            color: #22c55e;
-        }
-
-        .bad {
-            color: #ef4444;
-        }
-
-        #events {
-            margin-top: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .event {
-            background: #020617;
-            border-left: 4px solid #22c55e;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
-
-        .topic {
-            color: #fbbf24;
-            font-weight: bold;
-        }
-
-        .timestamp {
-            color: #94a3b8;
-            font-size: 11px;
-            margin-bottom: 5px;
-        }
-
-        pre {
-            background: #020617;
-            padding: 10px;
-            overflow-x: auto;
-            color: #a7f3d0;
-            margin: 0;
-        }
-    </style>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 20px;
+}
+h1 { color: #38bdf8; }
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.kpi {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+.kpi h3 { font-size: 13px; color: #94a3b8; }
+.kpi span { font-size: 22px; }
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+}
+canvas { height: 260px; }
+</style>
 </head>
 
 <body>
 
-<h1>📊 Kafka — Monitor en Tiempo Real</h1>
-<div class="status" id="status">⏳ Conectando al WebSocket…</div>
+<h1>Uber – Dashboard Analítico</h1>
 
-<div id="events"></div>
+<div class="kpis">
+    <div class="kpi"><h3>Total Ventas</h3><span id="totalSales">0</span></div>
+    <div class="kpi"><h3>Latencia Avg</h3><span id="latAvg">0</span></div>
+    <div class="kpi"><h3>Latencia p95</h3><span id="latP95">0</span></div>
+    <div class="kpi"><h3>Latencia p99</h3><span id="latP99">0</span></div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3>Top Zonas por Ventas</h3>
+        <canvas id="zonesChart"></canvas>
+    </div>
+    <div class="card">
+        <h3>Ventas por Hora</h3>
+        <canvas id="hourChart"></canvas>
+    </div>
+</div>
 
 <script>
-    console.log("🔥 HTML cargado");
+fetch("/api/dashboard")
+.then(r => r.json())
+.then(d => {
+    document.getElementById("totalSales").innerText =
+        d.totalSales.toFixed(2);
+    document.getElementById("latAvg").innerText = d.latency.avg;
+    document.getElementById("latP95").innerText = d.latency.p95;
+    document.getElementById("latP99").innerText = d.latency.p99;
 
-    const statusDiv = document.getElementById("status");
-    const eventsDiv = document.getElementById("events");
-
-    // ⚡ Conexión Socket.IO
-    const socket = io();
-
-    socket.on("connect", () => {
-        console.log("🟢 Conectado al WebSocket");
-        statusDiv.innerHTML = "🟢 Conectado al servidor WebSocket";
-        statusDiv.className = "status ok";
-    });
-
-    socket.on("disconnect", () => {
-        console.log("🔴 WebSocket desconectado");
-        statusDiv.innerHTML = "🔴 WebSocket desconectado";
-        statusDiv.className = "status bad";
-    });
-
-    socket.on("connect_error", (err) => {
-        console.error("❌ Error de conexión WebSocket", err);
-        statusDiv.innerHTML = "❌ Error conectando al WebSocket";
-        statusDiv.className = "status bad";
-    });
-
-    // 📩 EVENTOS DESDE KAFKA
-    socket.on("kafka_event", (payload) => {
-        console.log("📩 Evento Kafka recibido:", payload);
-
-        const div = document.createElement("div");
-        div.className = "event";
-
-        div.innerHTML = `
-            <div class="topic">📌 Topic: ${payload.topic}</div>
-            <div class="timestamp">⏱ ${payload.timestamp}</div>
-            <pre>${JSON.stringify(payload.data, null, 2)}</pre>
-        `;
-
-        eventsDiv.prepend(div);
-
-        // Limitar a 100 eventos
-        if (eventsDiv.children.length > 100) {
-            eventsDiv.removeChild(eventsDiv.lastChild);
+    new Chart(document.getElementById("zonesChart"), {
+        type: "bar",
+        data: {
+            labels: d.topZones.map(z => z.zone),
+            datasets: [{ data: d.topZones.map(z => z.sales) }]
         }
     });
+
+    new Chart(document.getElementById("hourChart"), {
+        type: "line",
+        data: {
+            labels: Object.keys(d.salesByHour),
+            datasets: [{ data: Object.values(d.salesByHour) }]
+        }
+    });
+});
 </script>
 
 </body>
